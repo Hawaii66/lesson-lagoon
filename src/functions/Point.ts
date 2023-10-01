@@ -64,13 +64,17 @@ export const Dot = (a: Point, b: Point) => {
   return a.x * b.x + a.y * b.y;
 };
 
+export const Cross = (a: Point, b: Point) => {
+  return a.x * b.y - a.y * b.x;
+};
+
 export const Normalize = (a: Point) => {
   const mag = Magnitue(a);
   return Divide(a, mag);
 };
 
 export const ToWorldCordinate = (a: Point, rotation: number) => {
-  const rot = DegToRad(rotation);
+  const rot = rotation; //DegToRad(rotation);
   const cos = Math.cos(rot);
   const sin = Math.sin(rot);
   const point = NewPoint(cos * a.x - sin * a.y, sin * a.x + cos * a.y);

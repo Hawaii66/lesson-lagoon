@@ -47,7 +47,8 @@ export default function Home() {
         height: 5,
       },
       0,
-      false,
+      true,
+      "falling-1",
       () => {
         tick();
       }
@@ -60,7 +61,8 @@ export default function Home() {
         height: 5,
       },
       0,
-      false,
+      true,
+      "falling-2",
       () => {
         tick();
       }
@@ -74,6 +76,7 @@ export default function Home() {
       },
       0,
       false,
+      "falling-3",
       () => {
         tick();
       }
@@ -87,6 +90,7 @@ export default function Home() {
       },
       0,
       true,
+      "ground-1",
       () => {
         tick();
       }
@@ -100,6 +104,7 @@ export default function Home() {
       },
       -25,
       true,
+      "ground-2",
       () => {
         tick();
       }
@@ -113,6 +118,7 @@ export default function Home() {
       },
       0,
       true,
+      "ground-3",
       () => {
         tick();
       }
@@ -156,8 +162,8 @@ export default function Home() {
         x: 0,
         y: 9.88 / (1400 / resolution) / 50,
       });*/
-      fallingBlock.AddForce(NewPoint(0, 9.88 / (1400 / resolution) / 50));
-      fallingBlock2.AddForce(NewPoint(0, 9.88 / (1400 / resolution) / 50));
+      //fallingBlock.AddForce(NewPoint(0, 9.88 / (1400 / resolution) / 50));
+      //fallingBlock2.AddForce(NewPoint(0, 9.88 / (1400 / resolution) / 50));
       fallingBlock3.AddForce(NewPoint(0, 9.88 / (1400 / resolution) / 50));
       //fallingBlock.rotationalVelocity = 2;
 
@@ -176,7 +182,7 @@ export default function Home() {
       ground2.Draw(ctx, 1400 / resolution);
       ground3.Update(updateEvent);
       ground3.Draw(ctx, 1400 / resolution);
-    }, 20);
+    }, 50);
 
     () => {
       clearInterval(t);
@@ -196,16 +202,20 @@ export default function Home() {
             ({selectedObject.x}; {selectedObject.y})
           </h2>
           <p>{selectedObject.rotation}</p>
+          <p>{selectedObject.rotationalVelocity}</p>
           <div className="flex flex-row w-full justify-between items-center gap-4 my-2">
             <input
               value={selectedObject.x}
               onChange={(e) => {
                 const newX =
                   e.target.value === "" ? 0 : parseInt(e.target.value);
-                selectedObject.Translate({
-                  x: newX - selectedObject.x,
-                  y: 0,
-                });
+                selectedObject.Translate(
+                  {
+                    x: newX - selectedObject.x,
+                    y: 0,
+                  },
+                  0
+                );
               }}
               type="number"
               className="bg-zinc-500 flex-grow"
@@ -215,7 +225,10 @@ export default function Home() {
               onChange={(e) => {
                 const newY =
                   e.target.value === "" ? 0 : parseInt(e.target.value);
-                selectedObject.Translate({ x: 0, y: newY - selectedObject.y });
+                selectedObject.Translate(
+                  { x: 0, y: newY - selectedObject.y },
+                  0
+                );
               }}
               type="number"
               className="bg-zinc-500 flex-grow"
@@ -230,7 +243,7 @@ export default function Home() {
               }
               selectedObject.Translate(
                 { x: 0, y: 0 },
-                (rot - selectedObject.rotation) % 360
+                rot - selectedObject.rotation
               );
             }}
             type="number"

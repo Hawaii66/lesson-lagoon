@@ -1,6 +1,7 @@
 import { Block } from "@/physics/Movable";
 import {
   Add,
+  Cross,
   Distance,
   Dot,
   Magnitue,
@@ -28,11 +29,12 @@ export const Solve = (blocks: Block[]) => {
       if (a.isStatic && b.isStatic) continue;
 
       const result = IsColliding(a, b);
+      if (!result.isIntersecting) continue;
 
       const manifold: CollisionManifold = {
         a,
         b,
-        contacts: [],
+        contacts: FindContactPoints(a, b),
         ...result,
       };
 
@@ -40,7 +42,7 @@ export const Solve = (blocks: Block[]) => {
     }
   }
 
-  manifolds.forEach(ResolveCollision);
+  manifolds.forEach(ResolveCollisionWithRotation);
 };
 
 const IsColliding = (a: Block, b: Block) => {
@@ -52,10 +54,12 @@ const IsColliding = (a: Block, b: Block) => {
   );
 
   const result = Intersection(polygonA, polygonB);
+  if (result.isIntersecting)
+    console.log(a.name, polygonA, a.rotation, b.name, polygonB, b.rotation);
   const { depth, normal } = result;
 
   if (b.isStatic && !a.isStatic) {
-    a.velocity = Add(a.velocity, Negative(Scale(normal, depth)));
+    a.velocity = Add(a.velocity, Scale(normal, depth));
   }
 
   if (a.isStatic && !b.isStatic) {
@@ -75,6 +79,75 @@ type IntersectionResult = {
   depth: number;
 };
 
+const ResolveCollisionWithRotation = ({
+  a,
+  b,
+  contacts,
+  depth,
+  normal,
+}: CollisionManifold) => {
+  const e = Math.min(a.restitution, b.restitution);
+
+  const impulsesInfo: { impulse: Point; ra: Point; rb: Point }[] = [];
+
+  console.log(contacts);
+
+  contacts.forEach((contactPoint) => {
+    const ra = Subtract(contactPoint, NewPoint(a.x, a.y));
+    const rb = Subtract(contactPoint, NewPoint(b.x, b.y));
+
+    const raPerp = NewPoint(-ra.y, ra.x);
+    const rbPerp = NewPoint(-rb.y, rb.x);
+
+    const angularVelocityA = Scale(raPerp, a.rotationalVelocity);
+    const angularVelocityB = Scale(rbPerp, b.rotationalVelocity);
+
+    const relativeVelocity = Subtract(
+      Add(a.velocity, angularVelocityA),
+      Add(b.velocity, angularVelocityB)
+    );
+
+    const contactVelocityMagnitude = Dot(relativeVelocity, normal);
+
+    if (contactVelocityMagnitude > 0) return;
+
+    const raPerpDotN = Dot(raPerp, normal);
+    const rbPerpDotN = Dot(rbPerp, normal);
+
+    const denom =
+      a.InverseMass() +
+      b.InverseMass() +
+      raPerpDotN * raPerpDotN * a.InverseInertia() +
+      rbPerpDotN * rbPerpDotN * b.InverseInertia();
+
+    console.log(denom);
+
+    var j = -(1 - e) * contactVelocityMagnitude;
+    j /= denom;
+    j /= contacts.length;
+
+    console.log(j, e, contactVelocityMagnitude);
+
+    const impulse = Scale(normal, j);
+    impulsesInfo.push({
+      impulse,
+      ra,
+      rb,
+    });
+  });
+  console.log(impulsesInfo);
+
+  impulsesInfo.forEach(({ impulse, ra, rb }) => {
+    //if (!a.isStatic) console.log("a", Cross(ra, impulse) * a.InverseInertia());
+    // if (!b.isStatic) console.log("b", -Cross(rb, impulse) * b.InverseInertia());
+
+    a.velocity = Add(a.velocity, Scale(impulse, a.InverseMass()));
+    a.rotationalVelocity += Cross(ra, impulse) * a.InverseInertia() * 10;
+    b.velocity = Subtract(b.velocity, Scale(impulse, b.InverseMass()));
+    b.rotationalVelocity += -Cross(rb, impulse) * b.InverseInertia() * 10;
+  });
+};
+
 const ResolveCollision = ({
   a,
   b,
@@ -82,9 +155,6 @@ const ResolveCollision = ({
   depth,
   normal,
 }: CollisionManifold) => {
-  const points = FindContactPoints(a, b);
-  console.log(points);
-
   const relativeVelocity = Subtract(a.velocity, b.velocity);
 
   const e = Math.min(a.restitution, b.restitution);

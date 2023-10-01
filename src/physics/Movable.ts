@@ -27,14 +27,17 @@ export class Block implements Rect, Draw, Update<Block> {
   restitution: number;
   isStatic: boolean;
   rotationalVelocity: number;
+  name: string;
   onUpdateUI: () => void;
 
   constructor(
     rect: Point & { width: number; height: number },
     rotation: number,
     isStatic: boolean,
+    name: string,
     onUpdateUI: () => void
   ) {
+    this.name = name;
     this.x = rect.x;
     this.y = rect.y;
 
@@ -66,8 +69,6 @@ export class Block implements Rect, Draw, Update<Block> {
     this.velocity = Add(this.velocity, this.acceleration);
 
     this.Translate(this.velocity, this.rotationalVelocity);
-
-    this.rotationalVelocity = 0;
 
     this.acceleration = ZERO;
 
@@ -115,12 +116,11 @@ export class Block implements Rect, Draw, Update<Block> {
     this.acceleration = Add(this.acceleration, Divide(force, this.mass));
   }
 
-  Translate(pos: Point, rot: number | undefined) {
+  Translate(pos: Point, rot: number) {
     this.x += pos.x;
     this.y += pos.y;
 
-    this.rotation += rot ?? this.rotation;
-    this.rotation %= 360;
+    this.rotation += rot;
 
     this.onUpdateUI();
   }
