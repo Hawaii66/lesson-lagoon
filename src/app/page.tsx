@@ -47,7 +47,7 @@ export default function Home() {
         height: 5,
       },
       0,
-      true,
+      false,
       "falling-1",
       () => {
         tick();
@@ -61,7 +61,7 @@ export default function Home() {
         height: 5,
       },
       0,
-      true,
+      false,
       "falling-2",
       () => {
         tick();
@@ -102,7 +102,7 @@ export default function Home() {
         height: 2,
         width: resolution / 4,
       },
-      -25,
+      25,
       true,
       "ground-2",
       () => {
@@ -158,14 +158,10 @@ export default function Home() {
         fallingBlock2,
         fallingBlock3,
       ]);
-      /*fallingBlock.velocity = Add(fallingBlock.velocity, {
-        x: 0,
-        y: 9.88 / (1400 / resolution) / 50,
-      });*/
-      //fallingBlock.AddForce(NewPoint(0, 9.88 / (1400 / resolution) / 50));
-      //fallingBlock2.AddForce(NewPoint(0, 9.88 / (1400 / resolution) / 50));
+
+      fallingBlock.AddForce(NewPoint(0, 9.88 / (1400 / resolution) / 50));
+      fallingBlock2.AddForce(NewPoint(0, 9.88 / (1400 / resolution) / 50));
       fallingBlock3.AddForce(NewPoint(0, 9.88 / (1400 / resolution) / 50));
-      //fallingBlock.rotationalVelocity = 2;
 
       fallingBlock.Update(updateEvent);
       fallingBlock.Draw(ctx, 1400 / resolution);
@@ -182,7 +178,7 @@ export default function Home() {
       ground2.Draw(ctx, 1400 / resolution);
       ground3.Update(updateEvent);
       ground3.Draw(ctx, 1400 / resolution);
-    }, 50);
+    }, 20);
 
     () => {
       clearInterval(t);

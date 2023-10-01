@@ -92,7 +92,7 @@ export class Block implements Rect, Draw, Update<Block> {
   Draw(ctx: Context2D, resolution: number) {
     ctx.save();
     ctx.translate(this.x * resolution, this.y * resolution);
-    ctx.rotate((this.rotation * Math.PI) / 180);
+    ctx.rotate(this.rotation);
     /*DrawSquare(
       ctx,
       ZERO,

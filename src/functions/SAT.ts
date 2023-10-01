@@ -142,9 +142,9 @@ const ResolveCollisionWithRotation = ({
     // if (!b.isStatic) console.log("b", -Cross(rb, impulse) * b.InverseInertia());
 
     a.velocity = Add(a.velocity, Scale(impulse, a.InverseMass()));
-    a.rotationalVelocity += Cross(ra, impulse) * a.InverseInertia() * 10;
+    a.rotationalVelocity += Cross(ra, impulse) * a.InverseInertia();
     b.velocity = Subtract(b.velocity, Scale(impulse, b.InverseMass()));
-    b.rotationalVelocity += -Cross(rb, impulse) * b.InverseInertia() * 10;
+    b.rotationalVelocity += -Cross(rb, impulse) * b.InverseInertia();
   });
 };
 
