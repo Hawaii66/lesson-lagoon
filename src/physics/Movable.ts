@@ -44,8 +44,8 @@ export class Block implements Rect, Draw, Update<Block> {
     this.x = rect.x;
     this.y = rect.y;
 
-    this.staticFriction = 0.9;
-    this.dynamicFriction = 0.8;
+    this.staticFriction = 0.8;
+    this.dynamicFriction = 0.7;
 
     this.isStatic = isStatic;
     this.restitution = 0.95;
@@ -67,8 +67,7 @@ export class Block implements Rect, Draw, Update<Block> {
     this.rotationalVelocity = 0;
 
     this.acceleration = ZERO;
-    this.mass = rect.width * rect.height;
-    this.mass *= this.mass;
+    this.mass = 5;
   }
 
   Update(dt: number) {

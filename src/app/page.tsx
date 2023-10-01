@@ -150,9 +150,9 @@ export default function Home() {
         },
       };
 
-      fallingBlock.AddForce(NewPoint(-1, 9.88 / (1400 / resolution)));
-      fallingBlock2.AddForce(NewPoint(-1, 9.88 / (1400 / resolution)));
-      fallingBlock3.AddForce(NewPoint(-1, 9.88 / (1400 / resolution)));
+      fallingBlock.AddForce(NewPoint(0, 9.88 / (1400 / resolution)));
+      fallingBlock2.AddForce(NewPoint(0, 9.88 / (1400 / resolution)));
+      fallingBlock3.AddForce(NewPoint(0, 9.88 / (1400 / resolution)));
 
       const substeps = 1000;
       const oneStep = 1 / substeps;
