@@ -65,12 +65,51 @@ export default function Home() {
         tick();
       }
     );
+    var fallingBlock3 = new Block(
+      {
+        x: 55,
+        y: 10,
+        width: 5,
+        height: 5,
+      },
+      0,
+      false,
+      () => {
+        tick();
+      }
+    );
     const ground = new Block(
       {
         x: resolution / 2,
         y: (resolution * 800) / 1400 - 1,
         height: 2,
         width: resolution,
+      },
+      0,
+      true,
+      () => {
+        tick();
+      }
+    );
+    const ground2 = new Block(
+      {
+        x: resolution / 2,
+        y: (resolution * 800) / 1400 / 2 - 1,
+        height: 2,
+        width: resolution / 4,
+      },
+      -25,
+      true,
+      () => {
+        tick();
+      }
+    );
+    const ground3 = new Block(
+      {
+        x: 0,
+        y: (resolution * 800) / 1400 / 2,
+        height: (resolution * 800) / 1400,
+        width: 1,
       },
       0,
       true,
@@ -105,25 +144,39 @@ export default function Home() {
         },
       };
 
-      Solve(ground, fallingBlock);
-      Solve(ground, fallingBlock2);
-      Solve(fallingBlock2, fallingBlock);
+      Solve([
+        ground,
+        ground2,
+        ground3,
+        fallingBlock,
+        fallingBlock2,
+        fallingBlock3,
+      ]);
       /*fallingBlock.velocity = Add(fallingBlock.velocity, {
         x: 0,
         y: 9.88 / (1400 / resolution) / 50,
       });*/
       fallingBlock.AddForce(NewPoint(0, 9.88 / (1400 / resolution) / 50));
       fallingBlock2.AddForce(NewPoint(0, 9.88 / (1400 / resolution) / 50));
+      fallingBlock3.AddForce(NewPoint(0, 9.88 / (1400 / resolution) / 50));
       //fallingBlock.rotationalVelocity = 2;
 
       fallingBlock.Update(updateEvent);
       fallingBlock.Draw(ctx, 1400 / resolution);
+
       fallingBlock2.Update(updateEvent);
       fallingBlock2.Draw(ctx, 1400 / resolution);
 
+      fallingBlock3.Update(updateEvent);
+      fallingBlock3.Draw(ctx, 1400 / resolution);
+
       ground.Update(updateEvent);
       ground.Draw(ctx, 1400 / resolution);
-    }, 50);
+      ground2.Update(updateEvent);
+      ground2.Draw(ctx, 1400 / resolution);
+      ground3.Update(updateEvent);
+      ground3.Draw(ctx, 1400 / resolution);
+    }, 20);
 
     () => {
       clearInterval(t);

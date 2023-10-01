@@ -38,15 +38,26 @@ export const Divide = (a: Point, b: number): Point => {
   return NewPoint(a.x / b, a.y / b);
 };
 
-export const MagnitueDX = (a: Point, b: Point) => {
+export const Distance = (a: Point, b: Point) => {
   const dx = a.x - b.x;
   const dy = a.y - b.y;
 
   return Magnitue(NewPoint(dx, dy));
 };
 
+export const DistanceSquared = (a: Point, b: Point) => {
+  const dx = a.x - b.x;
+  const dy = a.y - b.y;
+
+  return MagnitudeSquared(NewPoint(dx, dy));
+};
+
 export const Magnitue = (a: Point) => {
-  return Math.sqrt(a.x * a.x + a.y * a.y);
+  return Math.sqrt(MagnitudeSquared(a));
+};
+
+export const MagnitudeSquared = (a: Point) => {
+  return a.x * a.x + a.y * a.y;
 };
 
 export const Dot = (a: Point, b: Point) => {
@@ -69,3 +80,13 @@ export const ToWorldCordinate = (a: Point, rotation: number) => {
 export const DegToRad = (deg: number) => deg * (Math.PI / 180);
 
 export const Negative = (a: Point) => NewPoint(-a.x, -a.y);
+
+const VERY_SMALL_DISTANCE = 0.0000001;
+
+export const NearlyEqual = (a: number, b: number) => {
+  return Math.abs(a - b) < VERY_SMALL_DISTANCE;
+};
+
+export const NearlyEqualPoints = (a: Point, b: Point) => {
+  return DistanceSquared(a, b) < VERY_SMALL_DISTANCE * VERY_SMALL_DISTANCE;
+};

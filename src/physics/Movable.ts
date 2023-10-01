@@ -82,6 +82,12 @@ export class Block implements Rect, Draw, Update<Block> {
     }
   }
 
+  CalculateMomentOfInertia() {
+    const width = Math.abs(this.polygon[0].x - this.polygon[1].x);
+    const height = Math.abs(this.polygon[1].y - this.polygon[2].y);
+    return (1 / 12) * this.mass * (width * width + height * height);
+  }
+
   Draw(ctx: Context2D, resolution: number) {
     ctx.save();
     ctx.translate(this.x * resolution, this.y * resolution);
@@ -125,6 +131,14 @@ export class Block implements Rect, Draw, Update<Block> {
     }
 
     return 1 / this.mass;
+  }
+
+  InverseInertia() {
+    if (this.isStatic) {
+      return 0;
+    }
+
+    return 1 / this.CalculateMomentOfInertia();
   }
 }
 
