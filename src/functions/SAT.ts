@@ -54,16 +54,14 @@ const IsColliding = (a: Block, b: Block) => {
   );
 
   const result = Intersection(polygonA, polygonB);
-  if (result.isIntersecting)
-    console.log(a.name, polygonA, a.rotation, b.name, polygonB, b.rotation);
   const { depth, normal } = result;
 
   if (b.isStatic && !a.isStatic) {
-    a.velocity = Add(a.velocity, Scale(normal, depth));
+    a.velocity = Add(a.velocity, Scale(normal, depth * 0.99));
   }
 
   if (a.isStatic && !b.isStatic) {
-    b.velocity = Add(b.velocity, Negative(Scale(normal, depth)));
+    b.velocity = Add(b.velocity, Negative(Scale(normal, depth * 0.99)));
   }
 
   if (!b.isStatic && !a.isStatic) {
@@ -87,10 +85,11 @@ const ResolveCollisionWithRotation = ({
   normal,
 }: CollisionManifold) => {
   const e = Math.min(a.restitution, b.restitution);
+  const staticFriction = a.staticFriction;
+  const dynamicFriction = a.dynamicFriction;
 
   const impulsesInfo: { impulse: Point; ra: Point; rb: Point }[] = [];
-
-  console.log(contacts);
+  const jInfo: number[] = [];
 
   contacts.forEach((contactPoint) => {
     const ra = Subtract(contactPoint, NewPoint(a.x, a.y));
@@ -109,7 +108,10 @@ const ResolveCollisionWithRotation = ({
 
     const contactVelocityMagnitude = Dot(relativeVelocity, normal);
 
-    if (contactVelocityMagnitude > 0) return;
+    if (contactVelocityMagnitude > 0) {
+      jInfo.push(0);
+      return;
+    }
 
     const raPerpDotN = Dot(raPerp, normal);
     const rbPerpDotN = Dot(rbPerp, normal);
@@ -120,13 +122,9 @@ const ResolveCollisionWithRotation = ({
       raPerpDotN * raPerpDotN * a.InverseInertia() +
       rbPerpDotN * rbPerpDotN * b.InverseInertia();
 
-    console.log(denom);
-
-    var j = -(1 - e) * contactVelocityMagnitude;
+    var j = -(1 + e) * contactVelocityMagnitude;
     j /= denom;
     j /= contacts.length;
-
-    console.log(j, e, contactVelocityMagnitude);
 
     const impulse = Scale(normal, j);
     impulsesInfo.push({
@@ -134,17 +132,83 @@ const ResolveCollisionWithRotation = ({
       ra,
       rb,
     });
+    jInfo.push(j);
   });
-  console.log(impulsesInfo);
 
   impulsesInfo.forEach(({ impulse, ra, rb }) => {
-    //if (!a.isStatic) console.log("a", Cross(ra, impulse) * a.InverseInertia());
-    // if (!b.isStatic) console.log("b", -Cross(rb, impulse) * b.InverseInertia());
-
     a.velocity = Add(a.velocity, Scale(impulse, a.InverseMass()));
     a.rotationalVelocity += Cross(ra, impulse) * a.InverseInertia();
     b.velocity = Subtract(b.velocity, Scale(impulse, b.InverseMass()));
     b.rotationalVelocity += -Cross(rb, impulse) * b.InverseInertia();
+  });
+
+  ///Friction
+  const impulseFrictionInfo: {
+    frictionImpulse: Point;
+    ra: Point;
+    rb: Point;
+  }[] = [];
+
+  contacts.forEach((contactPoint, idx) => {
+    const ra = Subtract(contactPoint, NewPoint(a.x, a.y));
+    const rb = Subtract(contactPoint, NewPoint(b.x, b.y));
+
+    const raPerp = NewPoint(-ra.y, ra.x);
+    const rbPerp = NewPoint(-rb.y, rb.x);
+
+    const angularVelocityA = Scale(raPerp, a.rotationalVelocity);
+    const angularVelocityB = Scale(rbPerp, b.rotationalVelocity);
+
+    const relativeVelocity = Subtract(
+      Add(a.velocity, angularVelocityA),
+      Add(b.velocity, angularVelocityB)
+    );
+
+    var tangent = Subtract(
+      relativeVelocity,
+      Scale(normal, Dot(relativeVelocity, normal))
+    );
+
+    if (NearlyEqualPoints(tangent, ZERO)) {
+      return;
+    }
+
+    tangent = Normalize(tangent);
+
+    const raPerpDotT = Dot(raPerp, tangent);
+    const rbPerpDotT = Dot(rbPerp, tangent);
+
+    const denom =
+      a.InverseMass() +
+      b.InverseMass() +
+      raPerpDotT * raPerpDotT * a.InverseInertia() +
+      rbPerpDotT * rbPerpDotT * b.InverseInertia();
+
+    var jt = -Dot(relativeVelocity, tangent);
+    jt /= denom;
+    jt /= contacts.length;
+
+    var frictionImpulse = ZERO;
+
+    const j = jInfo[idx];
+    if (Math.abs(jt) < j * staticFriction) {
+      frictionImpulse = Scale(tangent, jt);
+    } else {
+      frictionImpulse = Scale(tangent, -j * dynamicFriction);
+    }
+
+    impulseFrictionInfo.push({
+      frictionImpulse,
+      ra,
+      rb,
+    });
+  });
+
+  impulseFrictionInfo.forEach(({ frictionImpulse, ra, rb }) => {
+    a.velocity = Add(a.velocity, Scale(frictionImpulse, a.InverseMass()));
+    a.rotationalVelocity += Cross(ra, frictionImpulse) * a.InverseInertia();
+    b.velocity = Subtract(b.velocity, Scale(frictionImpulse, b.InverseMass()));
+    b.rotationalVelocity += -Cross(rb, frictionImpulse) * b.InverseInertia();
   });
 };
 

@@ -1,5 +1,5 @@
 import { Canvas, Context2D, DrawLines, DrawSquare } from "@/functions/Canvas";
-import { Add, Divide, Point, ZERO } from "@/functions/Point";
+import { Add, Divide, Point, Scale, ZERO } from "@/functions/Point";
 import { Rect } from "@/functions/Rect";
 
 interface Draw {
@@ -13,7 +13,8 @@ export type UpdateEvent<T> = {
 };
 
 interface Update<T> {
-  Update: (event: UpdateEvent<T>) => void;
+  Update: (dt: number) => void;
+  FinalUpdate: (event: UpdateEvent<T>) => void;
 }
 
 export class Block implements Rect, Draw, Update<Block> {
@@ -28,6 +29,8 @@ export class Block implements Rect, Draw, Update<Block> {
   isStatic: boolean;
   rotationalVelocity: number;
   name: string;
+  staticFriction: number;
+  dynamicFriction: number;
   onUpdateUI: () => void;
 
   constructor(
@@ -41,8 +44,11 @@ export class Block implements Rect, Draw, Update<Block> {
     this.x = rect.x;
     this.y = rect.y;
 
+    this.staticFriction = 0.9;
+    this.dynamicFriction = 0.8;
+
     this.isStatic = isStatic;
-    this.restitution = 0.9;
+    this.restitution = 0.95;
 
     const width = rect.width;
     const height = rect.height;
@@ -61,14 +67,21 @@ export class Block implements Rect, Draw, Update<Block> {
     this.rotationalVelocity = 0;
 
     this.acceleration = ZERO;
-    this.mass = 1;
+    this.mass = rect.width * rect.height;
+    this.mass *= this.mass;
   }
 
-  Update({ isMouseDown, mousePosition, onClicked }: UpdateEvent<Block>) {
+  Update(dt: number) {
     //F=ma => a = f/m
+    this.Translate(Scale(this.velocity, dt), this.rotationalVelocity * dt);
+  }
+
+  FinalUpdate({ isMouseDown, mousePosition, onClicked }: UpdateEvent<Block>) {
     this.velocity = Add(this.velocity, this.acceleration);
 
-    this.Translate(this.velocity, this.rotationalVelocity);
+    //if (Math.abs(this.velocity.x) < 0.01) this.velocity.x = 0;
+    //if (Math.abs(this.velocity.y) < 0.01) this.velocity.y = 0;
+    //if (Math.abs(this.rotationalVelocity) < 0.001) this.rotationalVelocity = 0;
 
     this.acceleration = ZERO;
 
@@ -114,6 +127,10 @@ export class Block implements Rect, Draw, Update<Block> {
   AddForce(force: Point) {
     //f=ma => a = f/a
     this.acceleration = Add(this.acceleration, Divide(force, this.mass));
+  }
+
+  AddGravity(force: Point) {
+    this.acceleration = Add(this.acceleration, force);
   }
 
   Translate(pos: Point, rot: number) {

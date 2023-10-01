@@ -41,10 +41,10 @@ export default function Home() {
 
     var fallingBlock = new Block(
       {
-        x: 20,
+        x: 23,
         y: 20,
-        width: 5,
-        height: 5,
+        width: 2,
+        height: 2,
       },
       0,
       false,
@@ -150,33 +150,45 @@ export default function Home() {
         },
       };
 
-      Solve([
-        ground,
-        ground2,
-        ground3,
-        fallingBlock,
-        fallingBlock2,
-        fallingBlock3,
-      ]);
+      fallingBlock.AddForce(NewPoint(-1, 9.88 / (1400 / resolution)));
+      fallingBlock2.AddForce(NewPoint(-1, 9.88 / (1400 / resolution)));
+      fallingBlock3.AddForce(NewPoint(-1, 9.88 / (1400 / resolution)));
 
-      fallingBlock.AddForce(NewPoint(0, 9.88 / (1400 / resolution) / 50));
-      fallingBlock2.AddForce(NewPoint(0, 9.88 / (1400 / resolution) / 50));
-      fallingBlock3.AddForce(NewPoint(0, 9.88 / (1400 / resolution) / 50));
+      const substeps = 1000;
+      const oneStep = 1 / substeps;
+      for (var i = 0; i < substeps; i++) {
+        Solve([
+          ground,
+          ground2,
+          ground3,
+          fallingBlock,
+          fallingBlock2,
+          fallingBlock3,
+        ]);
 
-      fallingBlock.Update(updateEvent);
+        ground.Update(oneStep);
+        ground2.Update(oneStep);
+        ground3.Update(oneStep);
+        fallingBlock.Update(oneStep);
+        fallingBlock2.Update(oneStep);
+        fallingBlock3.Update(oneStep);
+      }
+
+      fallingBlock.FinalUpdate(updateEvent);
       fallingBlock.Draw(ctx, 1400 / resolution);
 
-      fallingBlock2.Update(updateEvent);
+      fallingBlock2.FinalUpdate(updateEvent);
       fallingBlock2.Draw(ctx, 1400 / resolution);
 
-      fallingBlock3.Update(updateEvent);
+      fallingBlock3.FinalUpdate(updateEvent);
+
       fallingBlock3.Draw(ctx, 1400 / resolution);
 
-      ground.Update(updateEvent);
+      ground.FinalUpdate(updateEvent);
       ground.Draw(ctx, 1400 / resolution);
-      ground2.Update(updateEvent);
+      ground2.FinalUpdate(updateEvent);
       ground2.Draw(ctx, 1400 / resolution);
-      ground3.Update(updateEvent);
+      ground3.FinalUpdate(updateEvent);
       ground3.Draw(ctx, 1400 / resolution);
     }, 20);
 
@@ -196,6 +208,9 @@ export default function Home() {
           <h1>Edit object</h1>
           <h2>
             ({selectedObject.x}; {selectedObject.y})
+          </h2>
+          <h2>
+            ({selectedObject.velocity.x}; {selectedObject.velocity.y})
           </h2>
           <p>{selectedObject.rotation}</p>
           <p>{selectedObject.rotationalVelocity}</p>
