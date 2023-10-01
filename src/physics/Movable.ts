@@ -1,5 +1,5 @@
 import { Canvas, Context2D, DrawLines, DrawSquare } from "@/functions/Canvas";
-import { Add, Point, ZERO } from "@/functions/Point";
+import { Add, Divide, Point, ZERO } from "@/functions/Point";
 import { Rect } from "@/functions/Rect";
 
 interface Draw {
@@ -8,7 +8,6 @@ interface Draw {
 
 export type UpdateEvent<T> = {
   mousePosition: Point;
-  resolution: number;
   isMouseDown: boolean;
   onClicked: (obj: T) => void;
 };
@@ -23,17 +22,24 @@ export class Block implements Rect, Draw, Update<Block> {
   polygon: Point[];
   rotation: number;
   velocity: Point;
+  acceleration: Point;
+  mass: number;
+  restitution: number;
+  isStatic: boolean;
   rotationalVelocity: number;
-  isPlaced: boolean = false;
   onUpdateUI: () => void;
 
   constructor(
     rect: Point & { width: number; height: number },
     rotation: number,
+    isStatic: boolean,
     onUpdateUI: () => void
   ) {
     this.x = rect.x;
     this.y = rect.y;
+
+    this.isStatic = isStatic;
+    this.restitution = 0.9;
 
     const width = rect.width;
     const height = rect.height;
@@ -50,24 +56,20 @@ export class Block implements Rect, Draw, Update<Block> {
 
     this.velocity = ZERO;
     this.rotationalVelocity = 0;
+
+    this.acceleration = ZERO;
+    this.mass = 1;
   }
 
-  Update({
-    isMouseDown,
-    mousePosition,
-    resolution,
-    onClicked,
-  }: UpdateEvent<Block>) {
-    /*if (!this.isPlaced && isMouseDown) {
-      this.x = Math.floor(mousePosition.x / resolution) * resolution;
-      this.y = Math.floor(mousePosition.y / resolution) * resolution;
-    }
-
-    if (!isMouseDown && !this.isPlaced) {
-      this.isPlaced = true;
-    }*/
+  Update({ isMouseDown, mousePosition, onClicked }: UpdateEvent<Block>) {
+    //F=ma => a = f/m
+    this.velocity = Add(this.velocity, this.acceleration);
 
     this.Translate(this.velocity, this.rotationalVelocity);
+
+    this.rotationalVelocity = 0;
+
+    this.acceleration = ZERO;
 
     if (
       isMouseDown &&
@@ -78,18 +80,6 @@ export class Block implements Rect, Draw, Update<Block> {
     ) {
       onClicked(this);
     }
-
-    /*if (
-      isMouseDown &&
-      mousePosition.x > this.x &&
-      mousePosition.y > this.y &&
-      mousePosition.x < this.x + this.width &&
-      mousePosition.y < this.y + this.height
-    ) {
-      this.isPlaced = false;
-
-      onClicked(this);
-    }*/
   }
 
   Draw(ctx: Context2D, resolution: number) {
@@ -114,13 +104,27 @@ export class Block implements Rect, Draw, Update<Block> {
     ctx.restore();
   }
 
+  AddForce(force: Point) {
+    //f=ma => a = f/a
+    this.acceleration = Add(this.acceleration, Divide(force, this.mass));
+  }
+
   Translate(pos: Point, rot: number | undefined) {
     this.x += pos.x;
     this.y += pos.y;
 
     this.rotation += rot ?? this.rotation;
+    this.rotation %= 360;
 
     this.onUpdateUI();
+  }
+
+  InverseMass() {
+    if (this.isStatic) {
+      return 0;
+    }
+
+    return 1 / this.mass;
   }
 }
 

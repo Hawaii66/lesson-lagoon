@@ -1,6 +1,7 @@
 "use client";
 import { DrawGrid } from "@/functions/Canvas";
-import { Point, ZERO } from "@/functions/Point";
+import { Add, NewPoint, Point, ZERO } from "@/functions/Point";
+import { Solve } from "@/functions/SAT";
 import { useTick } from "@/hooks/useTick";
 import { Block, UpdateEvent } from "@/physics/Movable";
 import { useEffect, useRef, useState } from "react";
@@ -45,19 +46,34 @@ export default function Home() {
         width: 5,
         height: 5,
       },
-      25,
+      0,
+      false,
+      () => {
+        tick();
+      }
+    );
+    var fallingBlock2 = new Block(
+      {
+        x: 20,
+        y: 40,
+        width: 5,
+        height: 5,
+      },
+      0,
+      false,
       () => {
         tick();
       }
     );
     const ground = new Block(
       {
-        x: 0,
+        x: resolution / 2,
         y: (resolution * 800) / 1400 - 1,
         height: 2,
         width: resolution,
       },
       0,
+      true,
       () => {
         tick();
       }
@@ -84,21 +100,30 @@ export default function Home() {
           x: mousePos.current.x / (1400 / resolution),
           y: mousePos.current.y / (1400 / resolution),
         },
-        resolution: 1400 / resolution,
         onClicked: (target) => {
           setSelectedObject(target);
         },
       };
 
-      fallingBlock.velocity = { x: 0, y: 9.88 / (1400 / resolution) / 50 };
-      fallingBlock.rotationalVelocity = 2;
+      Solve(ground, fallingBlock);
+      Solve(ground, fallingBlock2);
+      Solve(fallingBlock2, fallingBlock);
+      /*fallingBlock.velocity = Add(fallingBlock.velocity, {
+        x: 0,
+        y: 9.88 / (1400 / resolution) / 50,
+      });*/
+      fallingBlock.AddForce(NewPoint(0, 9.88 / (1400 / resolution) / 50));
+      fallingBlock2.AddForce(NewPoint(0, 9.88 / (1400 / resolution) / 50));
+      //fallingBlock.rotationalVelocity = 2;
 
       fallingBlock.Update(updateEvent);
       fallingBlock.Draw(ctx, 1400 / resolution);
+      fallingBlock2.Update(updateEvent);
+      fallingBlock2.Draw(ctx, 1400 / resolution);
 
       ground.Update(updateEvent);
       ground.Draw(ctx, 1400 / resolution);
-    }, 20);
+    }, 50);
 
     () => {
       clearInterval(t);
@@ -150,7 +175,10 @@ export default function Home() {
               if (rot < 0) {
                 rot += 360;
               }
-              selectedObject.Translate({ x: 0, y: 0 }, rot % 360);
+              selectedObject.Translate(
+                { x: 0, y: 0 },
+                (rot - selectedObject.rotation) % 360
+              );
             }}
             type="number"
             className="bg-zinc-500"
