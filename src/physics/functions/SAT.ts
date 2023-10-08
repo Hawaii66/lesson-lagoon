@@ -1,4 +1,4 @@
-import { Block } from "@/physics/Movable";
+import { Block } from "@/Physics/Movable";
 import {
   Add,
   Cross,

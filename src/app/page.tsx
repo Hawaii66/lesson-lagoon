@@ -1,9 +1,9 @@
 "use client";
-import { DrawGrid } from "@/functions/Canvas";
-import { Add, NewPoint, Point, ZERO } from "@/functions/Point";
-import { Solve } from "@/functions/SAT";
+import { DrawGrid } from "@/Physics/functions/Canvas";
+import { Add, NewPoint, Point, ZERO } from "@/Physics/functions/Point";
+import { Solve } from "@/Physics/functions/SAT";
 import { useTick } from "@/hooks/useTick";
-import { Block, UpdateEvent } from "@/physics/Movable";
+import { Block, UpdateEvent } from "@/Physics/Movable";
 import { useEffect, useRef, useState } from "react";
 
 export default function Home() {
