@@ -1,7 +1,5 @@
-import { Add, Multiply, Point } from "./Point";
-
-export type Context2D = CanvasRenderingContext2D;
-export type Canvas = HTMLCanvasElement;
+import { Context2D, Point } from "../types";
+import { Add, Multiply } from "./Point";
 
 type DrawSettings = {
   stroke?: boolean;

@@ -1,21 +1,20 @@
-import { Block } from "@/Physics/Movable";
+import { Block } from "../Movable";
+import { Point } from "../types";
 import {
   Add,
-  Cross,
-  Distance,
-  Dot,
-  Magnitue,
-  Multiply,
-  NearlyEqual,
-  NearlyEqualPoints,
-  Negative,
   NewPoint,
-  Normalize,
-  Point,
-  Scale,
-  Subtract,
   ToWorldCordinate,
+  Negative,
+  Subtract,
+  NearlyEqualPoints,
   ZERO,
+  Normalize,
+  NearlyEqual,
+  Magnitue,
+  Distance,
+  Scale,
+  Dot,
+  Cross,
 } from "./Point";
 
 export const Solve = (blocks: Block[]) => {

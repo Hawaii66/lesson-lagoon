@@ -1,10 +1,12 @@
 "use client";
-import { DrawGrid } from "@/Physics/functions/Canvas";
-import { Add, NewPoint, Point, ZERO } from "@/Physics/functions/Point";
-import { Solve } from "@/Physics/functions/SAT";
+
 import { useTick } from "@/hooks/useTick";
-import { Block, UpdateEvent } from "@/Physics/Movable";
-import { useEffect, useRef, useState } from "react";
+import { Block, UpdateEvent } from "@/physics/Movable";
+import { DrawGrid } from "@/physics/functions/Canvas";
+import { ZERO, NewPoint } from "@/physics/functions/Point";
+import { Solve } from "@/physics/functions/SAT";
+import { Point } from "@/physics/types";
+import { useRef, useState, useEffect } from "react";
 
 export default function Home() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);

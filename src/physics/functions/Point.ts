@@ -1,7 +1,4 @@
-export type Point = {
-  x: number;
-  y: number;
-};
+import { Point } from "../types";
 
 export const ZERO: Point = { x: 0, y: 0 } as const;
 

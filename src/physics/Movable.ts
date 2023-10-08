@@ -1,11 +1,7 @@
-import {
-  Canvas,
-  Context2D,
-  DrawLines,
-  DrawSquare,
-} from "@/Physics/functions/Canvas";
-import { Add, Divide, Point, Scale, ZERO } from "@/Physics/functions/Point";
-import { Rect } from "@/Physics/functions/Rect";
+import { DrawLines } from "./functions/Canvas";
+import { Add, Divide, Scale, ZERO } from "./functions/Point";
+import { Rect } from "./functions/Rect";
+import { Context2D, Point } from "./types";
 
 interface Draw {
   Draw: (ctx: Context2D, resolution: number) => void;
