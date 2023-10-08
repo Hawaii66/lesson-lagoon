@@ -28,7 +28,7 @@ function Answers({ answers }: Props) {
       defaultValue={answers.map((i) => i.question)}
     >
       {answers.map((answer) => (
-        <Answer answer={answer} />
+        <Answer key={answer.question} answer={answer} />
       ))}
     </Accordion>
   );
