@@ -19,7 +19,9 @@ export default function RootLayout({
         }}
       >
         <body
-          className={"flex w-full min-h-screen justify-center items-center"}
+          className={
+            "flex dark w-full min-h-screen justify-center items-center"
+          }
         >
           <ThemeProvider>
             {children}
